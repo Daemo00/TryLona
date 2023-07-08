@@ -29,12 +29,31 @@ from lona_picocss.html import (
 )
 from lona_picocss import install_picocss
 
-from lona import RedirectResponse, Channel, View, App
+from lona import RedirectResponse, Channel, View, App, ForbiddenError
 
 NAME = re.compile(r'^([a-zA-Z0-9-_]+)$')
 MESSAGE_BACK_LOG = 10
 
 app = App(__file__)
+
+
+@app.middleware()
+class PasswordMiddleware:
+    """Try a Middleware."""
+
+    VALID_PASSWORDS = {
+        '1234',
+    }
+
+    def handle_request(self, data):
+        """Check Password."""
+        request = data.request
+        password = request.GET.get('p')
+
+        if password not in self.VALID_PASSWORDS:
+            raise ForbiddenError('You are not allowed here')
+
+        return data
 
 
 @app.route('/<room>(/)', name='room')
