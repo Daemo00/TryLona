@@ -146,6 +146,7 @@ class ChatView(View):
         )
 
         self.html = HTML(
+            Div(f"You are '{self.user_name}'"),
             H1(f'{self.room_name}'),
             self.messages,
             self.message_text_area,
