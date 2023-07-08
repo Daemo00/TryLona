@@ -18,7 +18,7 @@ classifiers = [
 ]
 
 dependencies = [
-  "lona-picocss",
+  "lona-picocss>=0.4.1",  # 0.4.1 fixed https://github.com/lona-web-org/lona-picocss/issues/7
 ]
 
 [project.optional-dependencies]
