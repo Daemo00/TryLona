@@ -4,6 +4,9 @@ from uuid import uuid1
 from time import time
 import re
 
+from lona.request import Request
+from lona.server import Server
+from lona.view_runtime import ViewRuntime
 from lona_picocss.html import (
     InlineButton,
     ScrollerDiv,
@@ -28,7 +31,7 @@ from lona_picocss import install_picocss
 
 from lona import RedirectResponse, Channel, View, App
 
-NAME = re.compile(r'^([a-zA-Z0-9-_]{1,})$')
+NAME = re.compile(r'^([a-zA-Z0-9-_]+)$')
 MESSAGE_BACK_LOG = 10
 
 app = App(__file__)
@@ -38,9 +41,28 @@ app = App(__file__)
 class ChatView(View):
     """Chat page."""
 
+    def __init__(
+            self,
+            server: Server,
+            view_runtime: ViewRuntime,
+            request: Request,
+    ):
+        """Add fields for chat management."""
+        super().__init__(server, view_runtime, request)
+        self.joined = None
+        self.channel = None
+        self.html = None
+        self.send_button = None
+        self.message_text_area = None
+        self.messages = None
+        self.room_state = None
+        self.session_key = None
+        self.user_name = None
+        self.room_name = None
+
     def show_message(self, message, index=None):
         """Show a Message."""
-        message_id, unix_timestamp, type, user_name, message = message
+        message_id, unix_timestamp, message_type, user_name, message = message
 
         span = Span(style='margin-left: 0.5em')
 
@@ -60,16 +82,16 @@ class ChatView(View):
             data_message_id=message_id,
         )
 
-        if type == 'message':
+        if message_type == 'message':
             span.set_text(message)
 
         else:
             span.set_text(f'*{message}*')
 
-            if type == 'join':
+            if message_type == 'join':
                 span.style['color'] = 'lime'
 
-            elif type == 'leave':
+            elif message_type == 'leave':
                 span.style['color'] = 'red'
 
         with self.html.lock:
@@ -82,13 +104,13 @@ class ChatView(View):
             else:
                 self.messages.insert(index, line)
 
-    def send_message(self, type, text):
+    def send_message(self, message_type, text):
         """Send a Message."""
         # create message
         message = [
             uuid1().hex,
             time(),
-            type,
+            message_type,
             self.user_name,
             text,
         ]
@@ -105,7 +127,7 @@ class ChatView(View):
         while len(self.room_state['log']) > MESSAGE_BACK_LOG:
             self.room_state['log'].pop(0)
 
-    def handle_send_button_click(self, input_event):
+    def handle_send_button_click(self, _input_event):
         """Send Button Click Handler."""
         message = self.message_text_area.value.strip()
         self.message_text_area.value = ''
@@ -123,7 +145,7 @@ class ChatView(View):
         self.user_name = self.server.state['user'].get(self.session_key, '')
         self.joined = False
 
-        # redirect to lobby if the user has no user name set
+        # redirect to lobby if the user has no username set
         if not self.user_name:
             return RedirectResponse(self.server.reverse('lobby'))
 
@@ -156,7 +178,7 @@ class ChatView(View):
         # subscribe to channel
         self.channel = self.subscribe(
             f'chat.room.{self.room_name}',
-            lambda message: self.show_message(message.data['message']),
+            lambda m: self.show_message(m.data['message']),
         )
 
         self.room_state['user'].append(self.user_name)
@@ -184,6 +206,24 @@ class LobbyView(View):
     """Show Rooms."""
 
     # alerts
+    def __init__(
+            self,
+            server: Server,
+            view_runtime: ViewRuntime,
+            request: Request,
+    ):
+        """Add fields for Lobby management."""
+        super().__init__(server, view_runtime, request)
+        self.channel = None
+        self.html = None
+        self.room_table = None
+        self.create_room_button = None
+        self.room_name = None
+        self.set_user_name_button = None
+        self.user_name = None
+        self.alerts = None
+        self.session_key = None
+
     def show_error_alert(self, *message):
         """Show error Alert."""
         with self.html.lock:
@@ -197,7 +237,7 @@ class LobbyView(View):
             self.alerts.nodes = list(message)
 
     # user name
-    def set_user_name(self, input_event):
+    def set_user_name(self, _input_event):
         """Set name of current User."""
         name = self.user_name.value
 
@@ -216,7 +256,7 @@ class LobbyView(View):
         return RedirectResponse('.')
 
     # rooms
-    def list_rooms(self, *args, **kwargs):
+    def list_rooms(self, *_args, **_kwargs):
         """List all the Rooms."""
         with self.html.lock:
             self.room_table[-1].clear()
@@ -236,7 +276,7 @@ class LobbyView(View):
                     ),
                 )
 
-    def create_room(self, input_event):
+    def create_room(self, _input_event):
         """Create a new room."""
         name = self.room_name.value
 
