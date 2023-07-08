@@ -1,0 +1,44 @@
+# Specifications for this file are in https://packaging.python.org/specifications/core-metadata
+[project]
+name = "TryLona"
+readme = "README.md"
+dynamic = ["version"]
+keywords = [
+  "development",
+]
+
+authors = [
+  { name = "Simone Rubino", email = "daemo00@gmail.com" },
+]
+
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+]
+
+dependencies = [
+  "lona-picocss",
+]
+
+[project.optional-dependencies]
+docs = [
+	"sphinx",
+	"sphinx-immaterial",
+]
+
+
+[project.scripts]
+add_number = "TryLona:cli.main"
+
+
+[tool.setuptools_scm]
+write_to = "src/TryLona/__version__.py"
+
+[build-system]
+requires = [
+  "setuptools>=45",
+  "setuptools_scm[toml]>=6.2",
+  "wheel",
+]
+build-backend = "setuptools.build_meta"
