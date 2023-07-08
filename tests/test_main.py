@@ -1,9 +1,10 @@
 import unittest
 
-from TryLona.main import add_one
+from TryLona.main import app
 
 
 class TestMain(unittest.TestCase):
 
-    def test_add_one(self):
-        self.assertEqual(add_one(5), 6)
+    def test_app(self):
+        """Dummy test."""
+        self.assertEqual(app.routes[0].name, 'room')

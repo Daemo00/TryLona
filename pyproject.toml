@@ -29,7 +29,7 @@ docs = [
 
 
 [project.scripts]
-add_number = "TryLona:cli.main"
+run = "TryLona:cli.main"
 
 
 [tool.setuptools_scm]

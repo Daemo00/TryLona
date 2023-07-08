@@ -1,17 +1,37 @@
-TryLona.main
-================
+﻿TryLona.main
+============
 
 .. automodule:: TryLona.main
 
+   
+   
+   
 
-
-
-
-
-
+   
+   
    .. rubric:: Functions
 
    .. autosummary::
+   
+      run
+      setup
+   
+   
 
-      add_one
-      create_user
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ChatView
+      LobbyView
+   
+   
+
+   
+   
+   
+
+
+
