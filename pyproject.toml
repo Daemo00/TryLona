@@ -38,7 +38,7 @@ write_to = "src/TryLona/__version__.py"
 [build-system]
 requires = [
   "setuptools>=45",
-  "setuptools_scm[toml]>=6.2",
+  "setuptools_scm[toml]>=10.1.1",
   "wheel",
 ]
 build-backend = "setuptools.build_meta"
